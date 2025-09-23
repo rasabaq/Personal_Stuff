@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Etapas con contraseña</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --panel: #121318;
+      --text: #e8e8ef;
+      --muted: #b8b8c2;
+      --accent: #2dd4bf;
+      --error: #ef4444;
+      --ok: #22c55e;
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.5;
+    }
+    header {
+      max-width: 900px; margin: 40px auto 16px; padding: 0 16px;
+    }
+    h1 { font-size: 1.6rem; margin: 0 0 6px; color: #000}
+    p.desc { margin: 0; color: #000; font-size: 1.4rem;  font-weight: bold }
+
+    main { max-width: 900px; margin: 16px auto 40px; padding: 0 16px}
+    .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+    .card h2 { margin: 0 0 4px; font-size: 1.1rem; }
+    .small { color: var(--muted); font-size: 0.9rem; }
+
+    .row { display: flex; gap: 8px; margin-top: 12px; }
+    input[type="password"], input[type="text"] {
+      flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,0.1);
+      background: #0e1015; color: var(--text);
+      border-radius: 10px; padding: 10px 12px; font-size: 1rem;
+      outline: none; transition: border-color .15s ease;
+    }
+    input:focus { border-color: var(--accent); }
+    button {
+      border: 0; cursor: pointer; border-radius: 10px;
+      padding: 10px 14px; font-size: 0.95rem; font-weight: 600;
+      background: var(--accent); color: #041817; transition: transform .05s ease;
+    }
+    button:active { transform: translateY(1px); }
+
+    .status { margin-top: 10px; min-height: 20px; font-size: 0.95rem; }
+    .status.error { color: var(--error); }
+    .status.ok { color: var(--ok); }
+
+    .content { margin-top: 12px; padding: 12px; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; background: #0e1014; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bienvenido Girasolcito! 🌻💗</h1>
+    <p class="desc">Te cuento que estas por comenzar este proyecto, espero que lo disfrutes y veas lo mucho que Ramón te ama. La instroducción son muy simples debes adivinar la contraseña para acceder a la siguiente etapa. Que te divierta! Te amo♥️</p>
+  </header>
+
+  <main>
+    <div id="grid" class="grid" aria-live="polite"></div>
+  </main>
+
+  <noscript>Necesitas habilitar JavaScript para que esto funcione.</noscript>
+
+  <script>
+    const STAGES = [
+      { id: 1, titulo: "Etapa 1", hash: "1ead971dd77b9a28ea193adc21bdd3c112119ef7d308d6ffd1a3d92edb1303e6", contenido: "https://docs.google.com/document/d/1JultDFvOtGOUg__bjSzLUtt6_XJXGDusnut-1jyNbv4/edit?usp=sharing" },
+      { id: 2, titulo: "Etapa 2", hash: "1e00ccaa1c4ea3f1f0bf7da0ba9827b6123b257507a62e0371385a41a989e110", contenido: "https://docs.google.com/document/d/1cmwI9yD5MB78GGtTi-dzXNFTEImjxMrVucKgN0X0sRg/edit?usp=sharing" },
+      { id: 3, titulo: "Etapa 3", hash: "d133fde023d8cc6ed9db5f58d0f655916c6b79452e4c98d0952f45b550e8b0c6", contenido: "Espero que lo haya logrado sin requerir sus pistas aún, ya que se pondra cada vez más dificil. Carta: " },
+      { id: 4, titulo: "Etapa 4", hash: "cefd32816353518ba828a32860620cf2525d5366a258582a837e5f97186dfd2e", contenido: "Fuaaaa al finnnn mi amorcitoooo!!!" },
+      { id: 5, titulo: "Etapa 5", hash: "8c5511a01488a2e4aa0030c2d60ef4dd5daa9d13a402ee266a072112860e01e1", contenido: "Texto de la Etapa 5. ¡Última etapa!" }
+    ];
+
+    const keyFor = (id) => `unlocked:${id}`;
+
+    async function sha256Hex(text) {
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      const bytes = new Uint8Array(buf);
+      let hex = '';
+      for (const b of bytes) hex += b.toString(16).padStart(2, '0');
+      return hex;
+    }
+
+    window.hashFor = async (t) => {
+      if (!crypto?.subtle) { console.warn('Web Crypto no disponible.'); return null; }
+      const h = await sha256Hex(String(t));
+      console.log(h);
+      return h;
+    };
+
+    function stageCard(stage, unlocked) {
+      const wrapper = document.createElement('section');
+      wrapper.className = 'card';
+      wrapper.id = `stage-${stage.id}`;
+
+      const title = document.createElement('h2');
+      title.textContent = stage.titulo;
+      wrapper.appendChild(title);
+
+      const hint = document.createElement('div');
+      hint.className = 'small';
+      hint.textContent = unlocked ? 'Desbloqueada' : 'Ingresa la contraseña para desbloquear';
+      wrapper.appendChild(hint);
+
+      const status = document.createElement('div');
+      status.className = 'status';
+      wrapper.appendChild(status);
+
+      const content = document.createElement('div');
+      content.className = 'content';
+
+      if (unlocked) {
+        content.textContent = stage.contenido;
+        wrapper.appendChild(content);
+      } else {
+        const row = document.createElement('div');
+        row.className = 'row';
+        const input = document.createElement('input');
+        input.type = 'password';
+        input.placeholder = 'Contraseña';
+        input.autocomplete = 'off';
+        input.ariaLabel = `Contraseña para ${stage.titulo}`;
+        const btn = document.createElement('button');
+        btn.textContent = 'Probar';
+
+        const tryUnlock = async () => {
+          status.textContent = '';
+          status.className = 'status';
+          btn.disabled = true;
+          const val = input.value.trim();
+          try {
+            if (!val) { throw new Error('Ingresa una contraseña.'); }
+            if (!crypto?.subtle) {
+              throw new Error('Tu navegador no soporta Web Crypto (SHA-256).');
+            }
+            const hex = await sha256Hex(val);
+            if (hex === stage.hash) {
+              localStorage.setItem(keyFor(stage.id), '1');
+              wrapper.replaceWith(stageCard(stage, true));
+              render();
+            } else {
+              throw new Error('Contraseña incorrecta.');
+            }
+          } catch (err) {
+            status.textContent = err.message || String(err);
+            status.classList.add('error');
+          } finally {
+            btn.disabled = false;
+            input.focus();
+            input.select();
+          }
+        };
+
+        btn.addEventListener('click', tryUnlock);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') tryUnlock();
+        });
+
+        row.appendChild(input);
+        row.appendChild(btn);
+        wrapper.appendChild(row);
+      }
+
+      return wrapper;
+    }
+
+    function render() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < STAGES.length; i++) {
+        const st = STAGES[i];
+        const unlocked = localStorage.getItem(keyFor(st.id)) === '1';
+        const previousUnlocked = i === 0 || localStorage.getItem(keyFor(STAGES[i-1].id)) === '1';
+        if (i === 0 || previousUnlocked || unlocked) {
+          grid.appendChild(stageCard(st, unlocked));
+        } else {
+          break;
+        }
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
