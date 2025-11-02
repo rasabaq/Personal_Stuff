@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Etapas con contraseña</title>
+  <title>Etapas con contraseÃ±a</title>
   <style>
     :root {
       --bg: #0b0c10;
@@ -27,10 +27,98 @@
       max-width: 900px; margin: 40px auto 16px; padding: 0 16px;
     }
     h1 { font-size: 1.6rem; margin: 0 0 6px; color: #000}
-    p.desc { margin: 0; color: #000; font-size: 1.4rem;  font-weight: bold }
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 18px;
+      padding: 6px; border-radius: 14px;
+      background: rgba(18,19,24,0.75); backdrop-filter: blur(6px);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .tab {
+      appearance: none; border: 0; cursor: pointer; border-radius: 10px;
+      padding: 8px 18px; font-size: 0.95rem; font-weight: 600;
+      background: transparent; color: var(--muted);
+      transition: color .2s ease, background .2s ease, box-shadow .2s ease, transform .1s ease;
+    }
+    .tab:hover { color: var(--text); }
+    .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .tab.active {
+      background: var(--accent); color: #041817;
+      box-shadow: 0 6px 18px rgba(45,212,191,0.35);
+    }
+    .slideshow {
+      position: relative;
+      margin-top: 24px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(14,16,20,0.85);
+      box-shadow: 0 18px 35px rgba(0,0,0,0.28);
+      aspect-ratio: 16 / 10;
+      min-height: 220px;
+    }
+    .slideshow img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity .8s ease;
+    }
+    .slideshow img.active { opacity: 1; }
+    .slideshow button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(4,24,23,0.75);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .slideshow button:hover {
+      background: rgba(45,212,191,0.95);
+      color: #041817;
+    }
+    .slideshow button:active { transform: translateY(-50%) scale(0.96); }
+    .slideshow button.prev { left: 14px; }
+    .slideshow button.next { right: 14px; }
+    .slideshow-dots {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+    .slideshow-dot {
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      border: none;
+      padding: 0;
+      background: rgba(255,255,255,0.35);
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .slideshow-dot.active {
+      background: var(--accent);
+      transform: scale(1.1);
+    }
+    p.desc {
+      margin: 0; font-size: 1.4rem; font-weight: bold; color: #041817;
+      padding: 18px 22px; border-radius: 20px;
+      border: 2px solid rgba(45,212,191,0.55);
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.18);
+    }
 
     main { max-width: 900px; margin: 16px auto 40px; padding: 0 16px}
-    .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    #stage-panel { min-height: 220px; }
 
     .card {
       background: var(--panel);
@@ -66,26 +154,34 @@
 </head>
 <body>
   <header>
-    <h1>Bienvenido Girasolcito! 🌻💗</h1>
-    <p class="desc">Te cuento que estas por comenzar este proyecto, espero que lo disfrutes y veas lo mucho que Ramón te ama. La instroducción son muy simples debes adivinar la contraseña para acceder a la siguiente etapa. Que te divierta! Te amo♥️</p>
+    <h1>Bienvenido Girasolcito!</h1>
+    <nav id="stage-tabs" class="tabs" role="tablist" aria-label="Etapas"></nav>
+    <p class="desc">Te cuento que estas por comenzar este proyecto, espero que lo disfrutes y veas lo mucho que Ramón te ama. La instroducciones son muy simples debes adivinar la contraseña para acceder a la siguiente etapa. Que te diviertas! Te amo🌻♥️</p>
   </header>
 
   <main>
-    <div id="grid" class="grid" aria-live="polite"></div>
+    <div id="stage-panel" aria-live="polite"></div>
   </main>
 
   <noscript>Necesitas habilitar JavaScript para que esto funcione.</noscript>
 
-  <script>
+    <script>
     const STAGES = [
       { id: 1, titulo: "Etapa 1", hash: "1ead971dd77b9a28ea193adc21bdd3c112119ef7d308d6ffd1a3d92edb1303e6", contenido: "https://docs.google.com/document/d/1JultDFvOtGOUg__bjSzLUtt6_XJXGDusnut-1jyNbv4/edit?usp=sharing" },
       { id: 2, titulo: "Etapa 2", hash: "1e00ccaa1c4ea3f1f0bf7da0ba9827b6123b257507a62e0371385a41a989e110", contenido: "https://docs.google.com/document/d/1cmwI9yD5MB78GGtTi-dzXNFTEImjxMrVucKgN0X0sRg/edit?usp=sharing" },
       { id: 3, titulo: "Etapa 3", hash: "d133fde023d8cc6ed9db5f58d0f655916c6b79452e4c98d0952f45b550e8b0c6", contenido: "https://docs.google.com/document/d/1E1qD2JD8Ivvn1I55-z3o4719NTvzuvaCmvpkDlceaNU/edit?usp=sharing" },
       { id: 4, titulo: "Etapa 4", hash: "cefd32816353518ba828a32860620cf2525d5366a258582a837e5f97186dfd2e", contenido: "Fuaaaa al finnnn mi amorcitoooo!!!" },
-      { id: 5, titulo: "Etapa 5", hash: "8c5511a01488a2e4aa0030c2d60ef4dd5daa9d13a402ee266a072112860e01e1", contenido: "Texto de la Etapa 5. ¡Última etapa!" }
+      { id: 5, titulo: "Etapa 5", hash: "8c5511a01488a2e4aa0030c2d60ef4dd5daa9d13a402ee266a072112860e01e1", contenido: "Texto de la Etapa 5. ???sltima etapa!" }
     ];
+    const SLIDESHOW_IMAGES = [
+      { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=75", alt: "Atardecer cálido con luces bokeh" },
+      { src: "https://images.unsplash.com/photo-1498079022511-d15614cb1c02?auto=format&fit=crop&w=1200&q=75", alt: "Pareja sosteniéndose de la mano" },
+      { src: "https://images.unsplash.com/photo-1514984879728-be0aff75a6e9?auto=format&fit=crop&w=1200&q=75", alt: "Girasoles iluminados por el sol" }
+    ];
+    const SLIDESHOW_INTERVAL_MS = 5000;
 
     const keyFor = (id) => `unlocked:${id}`;
+    let activeStageId = STAGES[0].id;
 
     async function sha256Hex(text) {
       const enc = new TextEncoder().encode(text);
@@ -103,6 +199,21 @@
       return h;
     };
 
+    function accessibleStages() {
+      const items = [];
+      for (let i = 0; i < STAGES.length; i++) {
+        const stage = STAGES[i];
+        const unlocked = localStorage.getItem(keyFor(stage.id)) === '1';
+        const previousUnlocked = i === 0 || localStorage.getItem(keyFor(STAGES[i - 1].id)) === '1';
+        if (i === 0 || previousUnlocked || unlocked) {
+          items.push({ stage, unlocked });
+        } else {
+          break;
+        }
+      }
+      return items;
+    }
+
     function stageCard(stage, unlocked) {
       const wrapper = document.createElement('section');
       wrapper.className = 'card';
@@ -114,7 +225,7 @@
 
       const hint = document.createElement('div');
       hint.className = 'small';
-      hint.textContent = unlocked ? 'Desbloqueada' : 'Ingresa la contraseña para desbloquear';
+      hint.textContent = unlocked ? 'Desbloqueada' : 'Ingresa la contrase?a para desbloquear';
       wrapper.appendChild(hint);
 
       const status = document.createElement('div');
@@ -132,9 +243,9 @@
         row.className = 'row';
         const input = document.createElement('input');
         input.type = 'password';
-        input.placeholder = 'Contraseña';
+        input.placeholder = 'Contrase?a';
         input.autocomplete = 'off';
-        input.ariaLabel = `Contraseña para ${stage.titulo}`;
+        input.setAttribute('aria-label', `Contrase?a para ${stage.titulo}`);
         const btn = document.createElement('button');
         btn.textContent = 'Probar';
 
@@ -144,17 +255,17 @@
           btn.disabled = true;
           const val = input.value.trim();
           try {
-            if (!val) { throw new Error('Ingresa una contraseña.'); }
+            if (!val) { throw new Error('Ingresa una contrase?a.'); }
             if (!crypto?.subtle) {
               throw new Error('Tu navegador no soporta Web Crypto (SHA-256).');
             }
             const hex = await sha256Hex(val);
             if (hex === stage.hash) {
               localStorage.setItem(keyFor(stage.id), '1');
-              wrapper.replaceWith(stageCard(stage, true));
+              activeStageId = stage.id;
               render();
             } else {
-              throw new Error('Contraseña incorrecta.');
+              throw new Error('Contrase?a incorrecta.');
             }
           } catch (err) {
             status.textContent = err.message || String(err);
@@ -179,22 +290,177 @@
       return wrapper;
     }
 
-    function render() {
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
-      for (let i = 0; i < STAGES.length; i++) {
-        const st = STAGES[i];
-        const unlocked = localStorage.getItem(keyFor(st.id)) === '1';
-        const previousUnlocked = i === 0 || localStorage.getItem(keyFor(STAGES[i-1].id)) === '1';
-        if (i === 0 || previousUnlocked || unlocked) {
-          grid.appendChild(stageCard(st, unlocked));
-        } else {
-          break;
-        }
+    function renderSlideshow(panel) {
+      const images = SLIDESHOW_IMAGES.filter((item) => item && item.src);
+      if (!images.length) { return; }
+
+      let timerId = null;
+      let current = 0;
+      let dots = [];
+
+      const wrapper = document.createElement('section');
+      wrapper.className = 'slideshow';
+
+      const imageElements = images.map((item, index) => {
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.alt = item.alt || `Foto ${index + 1}`;
+        img.loading = index === 0 ? 'eager' : 'lazy';
+        if (index === 0) { img.classList.add('active'); }
+        wrapper.appendChild(img);
+        img.addEventListener('error', () => {
+          img.remove();
+          const remaining = wrapper.querySelectorAll('img').length;
+          if (remaining <= 1) {
+            stopTimer();
+            dots.forEach((dot) => dot.remove());
+            dots = [];
+          }
+        }, { once: true });
+        return img;
+      });
+
+      const show = (targetIndex) => {
+        if (!imageElements.length) { return; }
+        const total = imageElements.length;
+        const nextIndex = (targetIndex + total) % total;
+        imageElements[current]?.classList.remove('active');
+        dots[current]?.classList.remove('active');
+        current = nextIndex;
+        imageElements[current]?.classList.add('active');
+        dots[current]?.classList.add('active');
+      };
+
+      if (imageElements.length > 1) {
+        const prev = document.createElement('button');
+        prev.type = 'button';
+        prev.className = 'prev';
+        prev.setAttribute('aria-label', 'Ver foto anterior');
+        prev.innerHTML = '&#10094;';
+
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'next';
+        next.setAttribute('aria-label', 'Ver foto siguiente');
+        next.innerHTML = '&#10095;';
+
+        const dotsWrapper = document.createElement('div');
+        dotsWrapper.className = 'slideshow-dots';
+
+        dots = imageElements.map((_, index) => {
+          const dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = `slideshow-dot${index === 0 ? ' active' : ''}`;
+          dot.setAttribute('aria-label', `Ir a la foto ${index + 1}`);
+          dot.addEventListener('click', () => {
+            show(index);
+            restartTimer();
+          });
+          dotsWrapper.appendChild(dot);
+          return dot;
+        });
+
+        prev.addEventListener('click', () => {
+          show(current - 1);
+          restartTimer();
+        });
+        next.addEventListener('click', () => {
+          show(current + 1);
+          restartTimer();
+        });
+
+        wrapper.appendChild(prev);
+        wrapper.appendChild(next);
+        wrapper.appendChild(dotsWrapper);
       }
+
+      const stopTimer = () => {
+        if (timerId !== null) {
+          window.clearInterval(timerId);
+          timerId = null;
+        }
+        if (panel.dataset.slideshowTimer) {
+          window.clearInterval(Number(panel.dataset.slideshowTimer));
+          delete panel.dataset.slideshowTimer;
+        }
+      };
+
+      const startTimer = () => {
+        if (imageElements.length <= 1) { return; }
+        stopTimer();
+        timerId = window.setInterval(() => {
+          if (!wrapper.isConnected) {
+            stopTimer();
+            return;
+          }
+          show(current + 1);
+        }, SLIDESHOW_INTERVAL_MS);
+        panel.dataset.slideshowTimer = String(timerId);
+      };
+
+      const restartTimer = () => {
+        stopTimer();
+        startTimer();
+      };
+
+      wrapper.addEventListener('mouseenter', stopTimer);
+      wrapper.addEventListener('mouseleave', startTimer);
+
+      panel.appendChild(wrapper);
+      startTimer();
     }
 
-    render();
+    function render() {
+      const tabs = document.getElementById('stage-tabs');
+      const panel = document.getElementById('stage-panel');
+      if (!tabs || !panel) return;
+
+      const available = accessibleStages();
+      if (!available.length) {
+        tabs.innerHTML = '';
+        panel.innerHTML = '';
+        return;
+      }
+
+      if (!available.some(({ stage }) => stage.id === activeStageId)) {
+        activeStageId = available[available.length - 1].stage.id;
+      }
+
+      tabs.innerHTML = '';
+      available.forEach(({ stage }) => {
+        const isActive = stage.id === activeStageId;
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = `tab${isActive ? ' active' : ''}`;
+        tab.id = `tab-${stage.id}`;
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        tab.setAttribute('tabindex', isActive ? '0' : '-1');
+        tab.textContent = stage.titulo;
+        tab.addEventListener('click', () => {
+          activeStageId = stage.id;
+          render();
+        });
+        tabs.appendChild(tab);
+      });
+
+      const activeEntry = available.find(({ stage }) => stage.id === activeStageId) ?? available[available.length - 1];
+        const { stage, unlocked } = activeEntry;
+
+        if (panel.dataset.slideshowTimer) {
+          window.clearInterval(Number(panel.dataset.slideshowTimer));
+          delete panel.dataset.slideshowTimer;
+        }
+        panel.innerHTML = '';
+        panel.setAttribute('role', 'tabpanel');
+        panel.setAttribute('aria-labelledby', `tab-${stage.id}`);
+        panel.appendChild(stageCard(stage, unlocked));
+        renderSlideshow(panel);
+      }
+
+      render();
   </script>
+
 </body>
 </html>
+
